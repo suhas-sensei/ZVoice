@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Next.js
+web/.next/
+web/out/
+
+# Cairo
+contracts/target/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log
