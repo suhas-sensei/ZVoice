@@ -34,7 +34,6 @@ function getController(): ControllerProvider {
   if (!controllerInstance) {
     controllerInstance = new ControllerProvider({
       rpcUrl: "https://starknet-sepolia.public.blastapi.io",
-      preset: "zvoice",
       signupOptions: ["google", "discord", "webauthn", "walletconnect", "password"],
     });
   }
