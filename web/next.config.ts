@@ -8,8 +8,9 @@ const nextConfig: NextConfig = {
       ...config.resolve.fallback,
       "@solana/web3.js": false,
       "@solana/spl-token": false,
-      "@cartridge/controller": false,
-      "@cartridge/account-wasm": false,
+      "@hyperlane-xyz/sdk": false,
+      "@hyperlane-xyz/registry": false,
+      "@hyperlane-xyz/utils": false,
     };
     return config;
   },

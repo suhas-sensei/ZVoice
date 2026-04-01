@@ -9,7 +9,7 @@ import { ProofStatus } from "@/components/ProofStatus";
 import type { ProofStatusType } from "@/components/ProofStatus";
 import { useCartridge } from "@/components/CartridgeProvider";
 import { useInvoices } from "@/hooks/useInvoices";
-import { SEPOLIA_TOKENS } from "@/lib/starkzap";
+import { SEPOLIA_TOKENS } from "@/lib/tokens";
 
 interface ScannedEmail {
   messageId: string;
@@ -51,7 +51,7 @@ function EmployeePageContent() {
   const [proofStates, setProofStates] = useState<
     Record<string, ProofStatusType>
   >({});
-  const [preferredToken, setPreferredToken] = useState(SEPOLIA_TOKENS.USDC);
+  const [preferredToken, setPreferredToken] = useState<string>(SEPOLIA_TOKENS.USDC);
 
   useEffect(() => {
     if (searchParams.get("gmail") === "connected") {
