@@ -6,8 +6,15 @@ export async function POST(request: NextRequest) {
 
   if (!refreshToken) {
     return NextResponse.json(
-      { error: "Gmail not connected. Please authorize first." },
+      { error: "Gmail not connected. Please connect Gmail first." },
       { status: 401 }
+    );
+  }
+
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+    return NextResponse.json(
+      { error: "Gmail OAuth not configured on server" },
+      { status: 503 }
     );
   }
 
@@ -24,12 +31,10 @@ export async function POST(request: NextRequest) {
       amountCents: e.amountCents,
     }));
 
-    return NextResponse.json({ emails: sanitized });
+    return NextResponse.json({ emails: sanitized, count: sanitized.length });
   } catch (error) {
     console.error("Email scan error:", error);
-    return NextResponse.json(
-      { error: "Failed to scan emails" },
-      { status: 500 }
-    );
+    const message = error instanceof Error ? error.message : "Failed to scan emails";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
