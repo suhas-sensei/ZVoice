@@ -358,6 +358,14 @@ function getRelayerAccount(): Account {
   });
 }
 
+function getAdminAccount(): Account {
+  return new Account({
+    provider: getProvider(),
+    address: process.env.ADMIN_ACCOUNT_ADDRESS || process.env.STARKNET_ACCOUNT_ADDRESS!,
+    signer: process.env.ADMIN_PRIVATE_KEY || process.env.STARKNET_PRIVATE_KEY!,
+  });
+}
+
 function getInvoiceContract(connectAccount = false): Contract {
   return new Contract({
     abi: INVOICE_ABI as unknown as import("starknet").Abi,
@@ -418,7 +426,7 @@ export async function submitInvoiceOnChain(params: {
 }
 
 export async function approveInvoiceOnChain(invoiceId: number): Promise<string> {
-  const account = getRelayerAccount();
+  const account = getAdminAccount();
   const contractAddress = process.env.INVOICE_CONTRACT_ADDRESS!;
 
   const result = await account.execute({
@@ -432,7 +440,7 @@ export async function approveInvoiceOnChain(invoiceId: number): Promise<string> 
 }
 
 export async function batchApproveOnChain(invoiceIds: number[]): Promise<string> {
-  const account = getRelayerAccount();
+  const account = getAdminAccount();
   const contractAddress = process.env.INVOICE_CONTRACT_ADDRESS!;
 
   const result = await account.execute({
@@ -446,7 +454,7 @@ export async function batchApproveOnChain(invoiceIds: number[]): Promise<string>
 }
 
 export async function rejectInvoiceOnChain(invoiceId: number): Promise<string> {
-  const account = getRelayerAccount();
+  const account = getAdminAccount();
   const contractAddress = process.env.INVOICE_CONTRACT_ADDRESS!;
 
   const result = await account.execute({
@@ -476,7 +484,7 @@ export async function markPaidOnChain(invoiceId: number, paymentTx: string): Pro
 // ── Policy Engine ────────────────────────────────────────────────────
 
 export async function setAutoApproveThreshold(amountCents: number): Promise<string> {
-  const account = getRelayerAccount();
+  const account = getAdminAccount();
   const contractAddress = process.env.INVOICE_CONTRACT_ADDRESS!;
 
   const result = await account.execute({
@@ -490,7 +498,7 @@ export async function setAutoApproveThreshold(amountCents: number): Promise<stri
 }
 
 export async function setMonthlyCap(amountCents: number): Promise<string> {
-  const account = getRelayerAccount();
+  const account = getAdminAccount();
   const contractAddress = process.env.INVOICE_CONTRACT_ADDRESS!;
 
   const result = await account.execute({
