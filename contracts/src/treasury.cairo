@@ -38,7 +38,7 @@ pub trait ITreasury<TContractState> {
 #[starknet::contract]
 pub mod Treasury {
     use starknet::{ContractAddress, get_caller_address, get_contract_address};
-    use starknet::storage::Map;
+    use starknet::storage::{Map, StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry};
     use core::num::traits::Zero;
     use super::{IERC20Dispatcher, IERC20DispatcherTrait};
 

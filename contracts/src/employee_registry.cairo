@@ -14,7 +14,7 @@ pub trait IEmployeeRegistry<TContractState> {
 #[starknet::contract]
 pub mod EmployeeRegistry {
     use starknet::{ContractAddress, get_caller_address};
-    use starknet::storage::Map;
+    use starknet::storage::{Map, StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry};
     use core::num::traits::Zero;
 
     #[storage]

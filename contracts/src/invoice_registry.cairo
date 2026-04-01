@@ -46,8 +46,7 @@ pub trait IZKInvoice<TContractState> {
 #[starknet::contract]
 pub mod ZKInvoice {
     use starknet::{ContractAddress, get_caller_address};
-    use starknet::storage::Map;
-    use core::num::traits::Zero;
+    use starknet::storage::{Map, StoragePointerReadAccess, StoragePointerWriteAccess, StoragePathEntry};
 
     // Invoice status constants
     const STATUS_PENDING: u8 = 0;
