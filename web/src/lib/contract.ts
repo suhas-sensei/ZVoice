@@ -233,24 +233,19 @@ function getProvider(): RpcProvider {
 }
 
 function getRelayerAccount(): Account {
-  const provider = getProvider();
-  return new Account(
-    provider,
-    process.env.STARKNET_ACCOUNT_ADDRESS!,
-    process.env.STARKNET_PRIVATE_KEY!
-  );
+  return new Account({
+    provider: getProvider(),
+    address: process.env.STARKNET_ACCOUNT_ADDRESS!,
+    signer: process.env.STARKNET_PRIVATE_KEY!,
+  });
 }
 
 function getContract(connectAccount = false): Contract {
-  const provider = getProvider();
-  const contract = new Contract(
-    ABI as unknown as Parameters<typeof Contract>[0],
-    process.env.INVOICE_CONTRACT_ADDRESS!,
-    provider
-  );
-  if (connectAccount) {
-    contract.connect(getRelayerAccount());
-  }
+  const contract = new Contract({
+    abi: ABI as unknown as import("starknet").Abi,
+    address: process.env.INVOICE_CONTRACT_ADDRESS!,
+    providerOrAccount: connectAccount ? getRelayerAccount() : getProvider(),
+  });
   return contract;
 }
 

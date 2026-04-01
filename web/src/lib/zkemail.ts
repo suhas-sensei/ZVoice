@@ -31,10 +31,8 @@ async function generateWithBlueprint(
   const sdk = initZkEmailSdk();
   const blueprint = await sdk.getBlueprint(blueprintSlug);
 
-  const isValid = await blueprint.validateEmail(rawEmail);
-  if (!isValid) {
-    throw new Error("Email failed DKIM validation");
-  }
+  // validateEmail throws if DKIM validation fails
+  await blueprint.validateEmail(rawEmail);
 
   const prover = blueprint.createProver({ isLocal: false });
   const proof = await prover.generateProof(rawEmail);
@@ -48,8 +46,8 @@ async function generateWithBlueprint(
     publicData: proof.props.publicData,
     verified: true,
     invoiceHash,
-    vendor: (proof.props.publicData as Record<string, string>).vendor || "",
-    amountCents: (proof.props.publicData as Record<string, number>).amount || 0,
+    vendor: (proof.props.publicData as unknown as Record<string, string>)?.vendor || "",
+    amountCents: (proof.props.publicData as unknown as Record<string, number>)?.amount || 0,
     timestamp: Math.floor(Date.now() / 1000),
   };
 }
