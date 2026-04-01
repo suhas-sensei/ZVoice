@@ -36,6 +36,9 @@ function getController(): ControllerProvider {
       rpc: "https://starknet-sepolia.public.blastapi.io",
       theme: "zvoice",
       colorMode: "dark",
+      config: {
+        authOptions: ["google", "discord", "webauthn", "walletconnect", "password"],
+      },
     });
   }
   return controllerInstance;
