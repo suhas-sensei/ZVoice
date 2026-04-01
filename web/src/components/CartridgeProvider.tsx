@@ -33,12 +33,9 @@ let controllerInstance: ControllerProvider | null = null;
 function getController(): ControllerProvider {
   if (!controllerInstance) {
     controllerInstance = new ControllerProvider({
-      rpc: "https://starknet-sepolia.public.blastapi.io",
-      theme: "zvoice",
-      colorMode: "dark",
-      config: {
-        authOptions: ["google", "discord", "webauthn", "walletconnect", "password"],
-      },
+      rpcUrl: "https://starknet-sepolia.public.blastapi.io",
+      preset: "zvoice",
+      signupOptions: ["google", "discord", "webauthn", "walletconnect", "password"],
     });
   }
   return controllerInstance;
