@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { approveInvoiceOnChain, markPaidOnChain } from "@/lib/contract";
+import { approveInvoiceOnChain, markPaidOnChain, getInvoices } from "@/lib/contract";
 import { payEmployee } from "@/lib/starkzap";
 
 export async function POST(request: NextRequest) {
@@ -26,17 +26,24 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // 1. Approve on-chain
-    const approveTx = await approveInvoiceOnChain(invoiceId);
+    // Check current invoice status
+    const invoices = await getInvoices();
+    const invoice = invoices.find((i) => i.id === invoiceId);
+    let approveTx = "";
 
-    // 2. Pay employee via StarkZap
+    // Only approve if pending (skip if already auto-approved)
+    if (invoice && invoice.status === "pending") {
+      approveTx = await approveInvoiceOnChain(invoiceId);
+    }
+
+    // Pay employee via StarkZap
     const { txHash: paymentTx } = await payEmployee({
       employeeAddress,
       amountCents,
       preferredToken,
     });
 
-    // 3. Mark paid on-chain
+    // Mark paid on-chain
     await markPaidOnChain(invoiceId, paymentTx);
 
     return NextResponse.json({
