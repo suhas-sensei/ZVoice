@@ -5,7 +5,7 @@ export interface Invoice {
   vendor: string;
   amountCents: number;
   timestamp: number;
-  status: "pending" | "approved" | "paid" | "rejected";
+  status: "pending" | "approved" | "paid" | "rejected" | "auto_approved";
   proofVerified: boolean;
   paymentTx: string;
 }
@@ -41,6 +41,7 @@ const STATUS_MAP: Record<number, Invoice["status"]> = {
   1: "approved",
   2: "paid",
   3: "rejected",
+  4: "auto_approved",
 };
 
 export function parseStatus(raw: number): Invoice["status"] {

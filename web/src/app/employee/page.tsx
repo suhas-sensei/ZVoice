@@ -7,8 +7,9 @@ import { WalletConnect } from "@/components/WalletConnect";
 import { GmailConnect } from "@/components/GmailConnect";
 import { ProofStatus } from "@/components/ProofStatus";
 import type { ProofStatusType } from "@/components/ProofStatus";
-import { useWallet } from "@/hooks/useWallet";
+import { useCartridge } from "@/components/CartridgeProvider";
 import { useInvoices } from "@/hooks/useInvoices";
+import { SEPOLIA_TOKENS } from "@/lib/starkzap";
 
 interface ScannedEmail {
   messageId: string;
@@ -19,16 +20,28 @@ interface ScannedEmail {
   amountCents: number;
 }
 
+const TOKEN_OPTIONS = [
+  { label: "USDC", address: SEPOLIA_TOKENS.USDC },
+  { label: "STRK", address: SEPOLIA_TOKENS.STRK },
+  { label: "ETH", address: SEPOLIA_TOKENS.ETH },
+];
+
 export default function EmployeePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-500">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-gray-500">
+          Loading...
+        </div>
+      }
+    >
       <EmployeePageContent />
     </Suspense>
   );
 }
 
 function EmployeePageContent() {
-  const { address, isConnected, connect, disconnect } = useWallet();
+  const { address, isConnected } = useCartridge();
   const { invoices, isLoading: invoicesLoading, refresh } = useInvoices();
   const searchParams = useSearchParams();
 
@@ -38,6 +51,7 @@ function EmployeePageContent() {
   const [proofStates, setProofStates] = useState<
     Record<string, ProofStatusType>
   >({});
+  const [preferredToken, setPreferredToken] = useState(SEPOLIA_TOKENS.USDC);
 
   useEffect(() => {
     if (searchParams.get("gmail") === "connected") {
@@ -52,6 +66,13 @@ function EmployeePageContent() {
   useEffect(() => {
     loadInvoices();
   }, [loadInvoices]);
+
+  // Auto-poll for new invoices every 10 seconds
+  useEffect(() => {
+    if (!address) return;
+    const interval = setInterval(() => refresh(address), 10000);
+    return () => clearInterval(interval);
+  }, [address, refresh]);
 
   const handleScan = async () => {
     setIsScanning(true);
@@ -104,6 +125,22 @@ function EmployeePageContent() {
     }
   };
 
+  const statusBadge = (status: string) => {
+    const styles: Record<string, string> = {
+      paid: "bg-green-900/30 text-green-400",
+      approved: "bg-blue-900/30 text-blue-400",
+      auto_approved: "bg-cyan-900/30 text-cyan-400",
+      rejected: "bg-red-900/30 text-red-400",
+      pending: "bg-yellow-900/30 text-yellow-400",
+    };
+    const label = status === "auto_approved" ? "auto-approved" : status;
+    return (
+      <span className={`text-xs px-2 py-1 rounded capitalize ${styles[status] || styles.pending}`}>
+        {label}
+      </span>
+    );
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
@@ -118,24 +155,49 @@ function EmployeePageContent() {
         </div>
         <div className="flex items-center gap-3">
           <GmailConnect isConnected={gmailConnected} />
-          <WalletConnect
-            address={address}
-            onConnect={connect}
-            onDisconnect={disconnect}
-          />
+          <WalletConnect />
         </div>
       </header>
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-6 py-8">
         {!isConnected ? (
           <div className="text-center py-20">
-            <h2 className="text-2xl font-semibold mb-2">Connect Your Wallet</h2>
+            <h2 className="text-2xl font-semibold mb-2">Sign In to Get Started</h2>
             <p className="text-gray-400">
-              Enter your StarkNet wallet address to get started.
+              Sign in with email via Cartridge to connect your StarkNet wallet.
             </p>
           </div>
         ) : (
           <div className="space-y-8">
+            {/* Token Preference */}
+            <section className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-300">
+                    Preferred Payment Token
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Choose which token you want to receive reimbursements in
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  {TOKEN_OPTIONS.map((tok) => (
+                    <button
+                      key={tok.address}
+                      onClick={() => setPreferredToken(tok.address)}
+                      className={`text-xs px-3 py-1.5 rounded-lg transition-colors ${
+                        preferredToken === tok.address
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-800 text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      {tok.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
+
             {/* Scan Section */}
             <section>
               <div className="flex items-center justify-between mb-4">
@@ -188,9 +250,7 @@ function EmployeePageContent() {
                           </td>
                           <td className="px-4 py-3">
                             <ProofStatus
-                              status={
-                                proofStates[email.messageId] || "none"
-                              }
+                              status={proofStates[email.messageId] || "none"}
                             />
                           </td>
                           <td className="px-4 py-3">
@@ -263,23 +323,11 @@ function EmployeePageContent() {
                             ${(inv.amountCents / 100).toFixed(2)}
                           </td>
                           <td className="px-4 py-3 text-gray-400">
-                            {new Date(inv.timestamp * 1000).toLocaleDateString()}
+                            {new Date(
+                              inv.timestamp * 1000
+                            ).toLocaleDateString()}
                           </td>
-                          <td className="px-4 py-3">
-                            <span
-                              className={`text-xs px-2 py-1 rounded capitalize ${
-                                inv.status === "paid"
-                                  ? "bg-green-900/30 text-green-400"
-                                  : inv.status === "approved"
-                                  ? "bg-blue-900/30 text-blue-400"
-                                  : inv.status === "rejected"
-                                  ? "bg-red-900/30 text-red-400"
-                                  : "bg-yellow-900/30 text-yellow-400"
-                              }`}
-                            >
-                              {inv.status}
-                            </span>
-                          </td>
+                          <td className="px-4 py-3">{statusBadge(inv.status)}</td>
                           <td className="px-4 py-3">
                             {inv.paymentTx && (
                               <a
