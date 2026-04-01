@@ -346,7 +346,7 @@ const TREASURY_ABI = [
 
 function getProvider(): RpcProvider {
   return new RpcProvider({
-    nodeUrl: "https://starknet-sepolia.public.blastapi.io",
+    nodeUrl: process.env.STARKNET_RPC_URL || "https://starknet-sepolia.public.blastapi.io",
   });
 }
 

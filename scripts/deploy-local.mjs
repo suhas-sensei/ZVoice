@@ -1,0 +1,175 @@
+import { RpcProvider, Account, json, Contract, CallData, stark, hash } from "starknet";
+import fs from "fs";
+import path from "path";
+
+const RPC_URL = "http://localhost:5050";
+const CONTRACTS_DIR = path.resolve("contracts/target/dev");
+
+// Devnet pre-funded accounts (seed=0)
+const ADMIN = {
+  address: "0x064b48806902a367c8598f4f95c305e8c1a1acba5f082d294a43793113115691",
+  privateKey: "0x71d7bb07b9a64f6f78ac4c816aff4da9",
+};
+
+const RELAYER = {
+  address: "0x078662e7352d062084b0010068b99288486c2d8b914f6e2a55ce945f8792c8b1",
+  privateKey: "0x0e1406455b7d66b1690803be066cbe5e",
+};
+
+const ETH_TOKEN = "0x49D36570D4E46F48E99674BD3FCC84644DDD6B96F7C741B1562B82F9E004DC7";
+
+const provider = new RpcProvider({ nodeUrl: RPC_URL });
+const admin = new Account({ provider, address: ADMIN.address, signer: ADMIN.privateKey });
+
+async function declareAndDeploy(name, constructorArgs) {
+  const sierraPath = path.join(CONTRACTS_DIR, `zkinvoice_${name}.contract_class.json`);
+  const casmPath = path.join(CONTRACTS_DIR, `zkinvoice_${name}.compiled_contract_class.json`);
+
+  const sierra = json.parse(fs.readFileSync(sierraPath).toString());
+  const casm = json.parse(fs.readFileSync(casmPath).toString());
+
+  console.log(`  Declaring ${name}...`);
+  const declareResponse = await admin.declareIfNot({ contract: sierra, casm });
+  if (declareResponse.transaction_hash) {
+    await provider.waitForTransaction(declareResponse.transaction_hash);
+  }
+  const classHash = declareResponse.class_hash;
+  console.log(`    Class hash: ${classHash}`);
+
+  console.log(`  Deploying ${name}...`);
+  const { transaction_hash, contract_address } = await admin.deployContract({
+    classHash,
+    constructorCalldata: constructorArgs,
+  });
+  await provider.waitForTransaction(transaction_hash);
+  console.log(`    Address: ${contract_address}`);
+  console.log(`    Tx: ${transaction_hash}`);
+
+  return { classHash, address: contract_address };
+}
+
+async function invoke(contractAddress, entrypoint, calldata) {
+  const result = await admin.execute({
+    contractAddress,
+    entrypoint,
+    calldata: CallData.compile(calldata),
+  });
+  await provider.waitForTransaction(result.transaction_hash);
+  return result.transaction_hash;
+}
+
+async function main() {
+  console.log("=== DEPLOYING ALL 8 CONTRACTS ===\n");
+
+  // 1. EmployeeRegistry(admin)
+  const employeeRegistry = await declareAndDeploy("EmployeeRegistry", [ADMIN.address]);
+
+  // 2. Treasury(admin, treasury_token)
+  const treasury = await declareAndDeploy("Treasury", [ADMIN.address, ETH_TOKEN]);
+
+  // 3. ZKInvoice(admin, relayer)
+  const invoiceRegistry = await declareAndDeploy("ZKInvoice", [ADMIN.address, RELAYER.address]);
+
+  // 4. VendorRegistry(admin)
+  const vendorRegistry = await declareAndDeploy("VendorRegistry", [ADMIN.address]);
+
+  // 5. MultisigApprover(admin, threshold=2, amount_threshold=50000)
+  const multisig = await declareAndDeploy("MultisigApprover", [ADMIN.address, "2", "50000"]);
+
+  // 6. ReimbursementNFT(admin)
+  const nft = await declareAndDeploy("ReimbursementNFT", [ADMIN.address]);
+
+  // 7. SpendingAnalytics(admin)
+  const analytics = await declareAndDeploy("SpendingAnalytics", [ADMIN.address]);
+
+  // 8. ProofVerifier(admin)
+  const proofVerifier = await declareAndDeploy("ProofVerifier", [ADMIN.address]);
+
+  console.log("\n=== WIRING CONTRACTS ===\n");
+
+  // Wire invoice_registry
+  console.log("  invoice_registry.set_treasury...");
+  await invoke(invoiceRegistry.address, "set_treasury", { treasury: treasury.address });
+
+  console.log("  invoice_registry.set_employee_registry...");
+  await invoke(invoiceRegistry.address, "set_employee_registry", { registry: employeeRegistry.address });
+
+  // Wire treasury
+  console.log("  treasury.set_authorized_caller...");
+  await invoke(treasury.address, "set_authorized_caller", { caller: invoiceRegistry.address });
+
+  // Wire vendor_registry
+  console.log("  vendor_registry.set_authorized_caller...");
+  await invoke(vendorRegistry.address, "set_authorized_caller", { caller: invoiceRegistry.address });
+
+  // Wire analytics
+  console.log("  analytics.set_authorized_caller...");
+  await invoke(analytics.address, "set_authorized_caller", { caller: invoiceRegistry.address });
+
+  // Wire proof_verifier
+  console.log("  proof_verifier.set_authorized_submitter...");
+  await invoke(proofVerifier.address, "set_authorized_submitter", { submitter: RELAYER.address });
+
+  // Wire NFT
+  console.log("  nft.set_authorized_minter...");
+  await invoke(nft.address, "set_authorized_minter", { minter: invoiceRegistry.address });
+
+  // Set policy
+  console.log("  set auto_approve_threshold to $50...");
+  await invoke(invoiceRegistry.address, "set_auto_approve_threshold", { amount_cents: "5000" });
+
+  console.log("  set monthly_cap to $1000...");
+  await invoke(invoiceRegistry.address, "set_monthly_cap", { amount_cents: "100000" });
+
+  console.log("\n=== ALL DEPLOYED AND WIRED ===\n");
+
+  // Generate .env.local
+  const envContent = `# Auto-generated by deploy-local.mjs
+# Starknet devnet (localhost:5050, seed=0)
+STARKNET_NETWORK=devnet
+STARKNET_RPC_URL=http://localhost:5050
+
+# Admin account (devnet account 0)
+STARKNET_ACCOUNT_ADDRESS=${ADMIN.address}
+STARKNET_PRIVATE_KEY=${ADMIN.privateKey}
+
+# Contract addresses
+INVOICE_CONTRACT_ADDRESS=${invoiceRegistry.address}
+EMPLOYEE_REGISTRY_ADDRESS=${employeeRegistry.address}
+TREASURY_ADDRESS=${treasury.address}
+VENDOR_REGISTRY_ADDRESS=${vendorRegistry.address}
+MULTISIG_ADDRESS=${multisig.address}
+NFT_ADDRESS=${nft.address}
+ANALYTICS_ADDRESS=${analytics.address}
+PROOF_VERIFIER_ADDRESS=${proofVerifier.address}
+
+# Admin addresses (comma-separated)
+ADMIN_ADDRESSES=${ADMIN.address}
+
+# Gmail (fill these in for email scanning)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/gmail/callback
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+`;
+
+  fs.writeFileSync("web/.env.local", envContent);
+  console.log("Wrote web/.env.local");
+
+  console.log("\nContract addresses:");
+  console.log(`  INVOICE_CONTRACT_ADDRESS=${invoiceRegistry.address}`);
+  console.log(`  EMPLOYEE_REGISTRY_ADDRESS=${employeeRegistry.address}`);
+  console.log(`  TREASURY_ADDRESS=${treasury.address}`);
+  console.log(`  VENDOR_REGISTRY_ADDRESS=${vendorRegistry.address}`);
+  console.log(`  MULTISIG_ADDRESS=${multisig.address}`);
+  console.log(`  NFT_ADDRESS=${nft.address}`);
+  console.log(`  ANALYTICS_ADDRESS=${analytics.address}`);
+  console.log(`  PROOF_VERIFIER_ADDRESS=${proofVerifier.address}`);
+}
+
+main().catch((e) => {
+  console.error("Deploy failed:", e);
+  process.exit(1);
+});
