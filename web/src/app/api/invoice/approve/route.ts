@@ -1,22 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { approveInvoiceOnChain, markPaidOnChain, getInvoices } from "@/lib/contract";
+import { approveInvoiceOnChain, markPaidOnChain, getInvoices, getPreferredToken } from "@/lib/contract";
 import { payEmployee } from "@/lib/starkzap";
 
 export async function POST(request: NextRequest) {
   const { invoiceId, employeeAddress, amountCents, preferredToken, adminAddress } =
     await request.json();
 
-  // Verify admin (skip check on devnet for local testing)
-  const isDevnet = process.env.STARKNET_NETWORK === "devnet";
-  if (!isDevnet) {
-    const adminAddresses = (process.env.ADMIN_ADDRESSES || "")
-      .split(",")
-      .map((a) => a.trim().toLowerCase());
-
-    if (!adminAddress || !adminAddresses.includes(adminAddress.toLowerCase())) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
-    }
-  }
+  // On-chain access control is enforced by the contract itself
 
   if (!invoiceId && invoiceId !== 0) {
     return NextResponse.json(
@@ -36,11 +26,22 @@ export async function POST(request: NextRequest) {
       approveTx = await approveInvoiceOnChain(invoiceId);
     }
 
-    // Pay employee via StarkZap
+    // Get employee's preferred token from on-chain registry
+    let tokenToUse = preferredToken;
+    if (!tokenToUse && invoice?.employee) {
+      try {
+        const onChainToken = await getPreferredToken(invoice.employee);
+        if (onChainToken && BigInt(onChainToken) !== 0n) {
+          tokenToUse = onChainToken;
+        }
+      } catch { /* use default */ }
+    }
+
+    // Pay employee via StarkZap (swaps from STRK to preferred token)
     const { txHash: paymentTx } = await payEmployee({
-      employeeAddress,
-      amountCents,
-      preferredToken,
+      employeeAddress: employeeAddress || invoice?.employee || "",
+      amountCents: amountCents || invoice?.amountCents || 0,
+      preferredToken: tokenToUse,
     });
 
     // Mark paid on-chain

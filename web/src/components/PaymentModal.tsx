@@ -126,7 +126,7 @@ export function PaymentModal({
               <>
                 Payment sent!{" "}
                 <a
-                  href={`https://sepolia.starkscan.co/tx/${result.paymentTx}`}
+                  href={`https://sepolia.voyager.online/tx/${result.paymentTx}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="underline"

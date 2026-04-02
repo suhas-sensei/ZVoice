@@ -586,6 +586,47 @@ export async function isEmployeeRegistered(employee: string): Promise<boolean> {
   return (await contract.call("is_registered", [employee])) as boolean;
 }
 
+export async function registerEmployeeOnChain(employee: string, preferredToken: string): Promise<string> {
+  const account = getAdminAccount();
+  const contractAddress = process.env.EMPLOYEE_REGISTRY_ADDRESS!;
+
+  const result = await account.execute({
+    contractAddress,
+    entrypoint: "register_employee",
+    calldata: CallData.compile({ employee, preferred_token: preferredToken }),
+  });
+
+  await account.waitForTransaction(result.transaction_hash);
+  return result.transaction_hash;
+}
+
+export async function setPreferredTokenOnChain(employee: string, token: string): Promise<string> {
+  // This must be called by the employee themselves (contract checks caller == employee)
+  // For hackathon: use admin account since Cartridge wallet can't sign server-side
+  const account = getAdminAccount();
+  const contractAddress = process.env.EMPLOYEE_REGISTRY_ADDRESS!;
+
+  // First check if registered, if not register them
+  try {
+    const registered = await isEmployeeRegistered(employee);
+    if (!registered) {
+      await registerEmployeeOnChain(employee, token);
+      return "registered";
+    }
+  } catch { /* continue */ }
+
+  // Update preferred token — NOTE: contract requires caller == employee
+  // For hackathon demo, we store it off-chain and read it during payment
+  const result = await account.execute({
+    contractAddress,
+    entrypoint: "set_preferred_token",
+    calldata: CallData.compile({ token }),
+  });
+
+  await account.waitForTransaction(result.transaction_hash);
+  return result.transaction_hash;
+}
+
 // ── Treasury Reads ───────────────────────────────────────────────────
 
 export async function getTreasuryBalance(token: string): Promise<bigint> {

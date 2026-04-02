@@ -127,7 +127,7 @@ export function InvoiceTable({
                   )}
                   {inv.status === "paid" && inv.paymentTx && (
                     <a
-                      href={`https://sepolia.starkscan.co/tx/${inv.paymentTx}`}
+                      href={`https://sepolia.voyager.online/tx/${inv.paymentTx}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs text-blue-400 hover:underline"

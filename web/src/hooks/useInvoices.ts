@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import type { Invoice } from "@/lib/types";
 
 interface UseInvoicesReturn {
@@ -14,9 +14,10 @@ export function useInvoices(): UseInvoicesReturn {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hasFetched = useRef(false);
 
   const refresh = useCallback(async (employee?: string) => {
-    setIsLoading(true);
+    if (!hasFetched.current) setIsLoading(true);
     setError(null);
 
     try {
@@ -29,6 +30,7 @@ export function useInvoices(): UseInvoicesReturn {
       }
 
       setInvoices(data.invoices);
+      hasFetched.current = true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
