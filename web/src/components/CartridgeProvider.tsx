@@ -51,7 +51,7 @@ export function CartridgeProvider({ children }: { children: ReactNode }) {
     const controller = getController();
     controller.probe().then((acc) => {
       if (acc) {
-        setAccount(acc);
+        setAccount(acc as any);
         setAddress(acc.address);
         controller.username()?.then((name) => setUsername(name));
       }
@@ -64,7 +64,7 @@ export function CartridgeProvider({ children }: { children: ReactNode }) {
       const controller = getController();
       const acc = await controller.connect();
       if (acc) {
-        setAccount(acc);
+        setAccount(acc as any);
         setAddress(acc.address);
         const name = await controller.username();
         if (name) setUsername(name);
