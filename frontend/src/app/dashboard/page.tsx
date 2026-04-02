@@ -86,7 +86,7 @@ export default function DashboardPage() {
             {/* Wallet card + upcoming + balance */}
             <div className="flex gap-4 mb-6">
               {/* Wallet card */}
-              <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-6 text-white w-[300px] flex-shrink-0">
+              <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-6 text-white flex-1">
                 <div className="flex justify-between items-start mb-8">
                   <span className="text-lg text-white/30">◉</span>
                   <span className="text-sm text-white/40">StarkNet</span>
@@ -102,7 +102,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Upcoming Payments */}
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-black/40 mb-3">Upcoming Payments</p>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-3">
@@ -117,7 +117,7 @@ export default function DashboardPage() {
               </div>
 
               {/* Wallet balance */}
-              <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-6 text-white w-[220px] flex-shrink-0">
+              <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-6 text-white flex-1">
                 <p className="text-sm text-white/40 mb-1">Wallet Balance</p>
                 <p className="text-2xl font-black mb-4">$12,840</p>
                 <div className="space-y-2">
