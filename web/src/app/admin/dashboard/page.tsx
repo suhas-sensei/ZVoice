@@ -324,8 +324,11 @@ export default function AdminDashboardPage() {
                       </button>
                     )}
                     {inv.paymentTx && (
-                      <a href={`https://sepolia.voyager.online/tx/${inv.paymentTx}`} target="_blank" rel="noopener noreferrer"
-                        className="text-xs text-black/30 hover:text-black leading-6">View Tx →</a>
+                      <>
+                        <a href={`https://sepolia.voyager.online/tx/${inv.paymentTx}`} target="_blank" rel="noopener noreferrer"
+                          className="text-xs text-black/30 hover:text-black leading-6">View Tx →</a>
+                        <span className="text-[10px] text-black/30 border border-black/10 px-1.5 py-0.5 rounded" title="Receipt NFT minted">NFT ✓</span>
+                      </>
                     )}
                   </div>
                 </div>

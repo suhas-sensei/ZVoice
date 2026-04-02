@@ -350,6 +350,9 @@ function DashboardContent() {
                       <a href={`https://sepolia.voyager.online/tx/${inv.paymentTx}`} target="_blank" rel="noopener noreferrer"
                         className="ml-3 text-xs text-black/40 hover:text-black">View Tx →</a>
                     )}
+                    {inv.status === "paid" && (
+                      <span className="ml-2 text-[10px] text-black/30 border border-black/10 px-1.5 py-0.5 rounded" title="Receipt NFT minted">NFT ✓</span>
+                    )}
                   </div>
                 ))}
               </div>
