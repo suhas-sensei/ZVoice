@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
-  title: "Astra - Full-service Creative Agency",
-  description: "Space of Creative Solutions - Full-service Creative Agency",
+  title: "ZVoice - Privacy-Preserving Invoice Reimbursement",
+  description: "ZK-powered corporate invoice verification and reimbursement on StarkNet",
 };
 
 export default function RootLayout({
@@ -18,8 +12,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} antialiased`}>
-      <body>{children}</body>
+    <html lang="en" className="antialiased">
+      <body style={{ fontFamily: "'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif" }}>
+        {children}
+      </body>
     </html>
   );
 }
