@@ -24,9 +24,10 @@ function formatDate(timestamp: number): string {
 }
 
 function statusBadge(status: Invoice["status"]) {
-  const styles: Record<Invoice["status"], string> = {
+  const styles: Record<string, string> = {
     pending: "bg-yellow-900/30 text-yellow-400",
     approved: "bg-blue-900/30 text-blue-400",
+    auto_approved: "bg-cyan-900/30 text-cyan-400",
     paid: "bg-green-900/30 text-green-400",
     rejected: "bg-red-900/30 text-red-400",
   };
