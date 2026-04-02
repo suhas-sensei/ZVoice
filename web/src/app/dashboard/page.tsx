@@ -66,6 +66,7 @@ function DashboardContent() {
   const [viewingProof, setViewingProof] = useState<string | null>(null);
   const [preferredToken, setPreferredToken] = useState<string>(SEPOLIA_TOKENS.STRK);
   const [copied, setCopied] = useState(false);
+  const [receipts, setReceipts] = useState<Array<{ tokenId: number; invoiceId: number; vendor: string; amountCents: number; paymentTx: string; timestamp: number }>>([]);
   const [walletBalance, setWalletBalance] = useState<{ strk: string; eth: string }>({ strk: "0", eth: "0" });
 
   const navIcons = ["⌂", "✉", "▤", "◉", "⊕", "⚙"];
@@ -104,6 +105,15 @@ function DashboardContent() {
   useEffect(() => {
     if (searchParams.get("gmail") === "connected") setGmailConnected(true);
   }, [searchParams]);
+
+  // Load receipts
+  useEffect(() => {
+    if (!address) return;
+    fetch(`/api/employee/receipts?employee=${address}`)
+      .then(r => r.json())
+      .then(data => { if (data.receipts) setReceipts(data.receipts); })
+      .catch(() => {});
+  }, [address, invoices]);
 
   // Load saved token preference from on-chain
   useEffect(() => {
@@ -356,6 +366,34 @@ function DashboardContent() {
                   </div>
                 ))}
               </div>
+            )}
+            {/* My Receipts (NFTs) */}
+            {receipts.length > 0 && (
+              <>
+                <h3 className="text-xl font-semibold text-black mb-3 mt-8">My Receipts</h3>
+                <p className="text-xs text-black/40 mb-3">{receipts.length} receipt NFT{receipts.length > 1 ? "s" : ""} minted on-chain (ZVRC)</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {receipts.map((r) => (
+                    <div key={r.tokenId} className="border border-black/8 rounded-lg p-4 hover:border-black/15 transition-colors">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] text-black/30 font-mono">ZVRC #{r.tokenId}</span>
+                        <span className="text-[10px] text-black/30">Invoice #{r.invoiceId}</span>
+                      </div>
+                      <p className="text-sm font-semibold text-black">{r.vendor}</p>
+                      <p className="text-lg font-black text-black mt-1">${(r.amountCents / 100).toFixed(2)}</p>
+                      <p className="text-[10px] text-black/30 mt-2">{new Date(r.timestamp * 1000).toLocaleDateString()}</p>
+                      <a
+                        href={`https://sepolia.voyager.online/tx/${r.paymentTx}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[10px] text-black/40 hover:text-black mt-1 block"
+                      >
+                        View payment tx →
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </>
             )}
           </div>
 

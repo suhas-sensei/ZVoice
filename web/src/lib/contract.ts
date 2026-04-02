@@ -639,6 +639,58 @@ export async function getTotalDisbursed(): Promise<bigint> {
   return (await contract.call("get_total_disbursed")) as bigint;
 }
 
+// ── NFT Reads ────────────────────────────────────────────────────────
+
+export async function getEmployeeReceipts(employee: string): Promise<Array<{
+  tokenId: number;
+  invoiceId: number;
+  vendor: string;
+  amountCents: number;
+  paymentTx: string;
+  timestamp: number;
+}>> {
+  const provider = getProvider();
+  const nftAddress = process.env.NFT_ADDRESS!;
+
+  // Get receipt count
+  const countResult = await provider.callContract({
+    contractAddress: nftAddress,
+    entrypoint: "get_employee_receipt_count",
+    calldata: [employee],
+  });
+  const count = Number(BigInt(countResult[0]));
+
+  const receipts = [];
+  for (let i = 0; i < count; i++) {
+    // Get token ID at index
+    const tokenIdResult = await provider.callContract({
+      contractAddress: nftAddress,
+      entrypoint: "get_employee_receipt_at",
+      calldata: [employee, i.toString(), "0"], // u256 low, high
+    });
+    const tokenId = Number(BigInt(tokenIdResult[0]));
+
+    // Get receipt data
+    const receiptResult = await provider.callContract({
+      contractAddress: nftAddress,
+      entrypoint: "get_receipt",
+      calldata: [tokenId.toString(), "0"], // u256 low, high
+    });
+
+    // Returns: (owner, invoice_id, vendor, amount_cents, payment_tx, timestamp)
+    receipts.push({
+      tokenId,
+      invoiceId: Number(BigInt(receiptResult[1])),
+      vendor: feltToShortString(BigInt(receiptResult[2])),
+      amountCents: Number(BigInt(receiptResult[3])),
+      paymentTx: "0x" + BigInt(receiptResult[4]).toString(16),
+      timestamp: Number(BigInt(receiptResult[5])),
+    });
+  }
+
+  return receipts;
+}
+
 // ── Reimbursement NFT ────────────────────────────────────────────────
 
 export async function mintReceiptNFT(params: {
