@@ -722,12 +722,10 @@ export async function mintReceiptNFT(params: {
 
   await account.waitForTransaction(result.transaction_hash);
 
-  // Get the token ID from the receipt (it's the return value)
-  const receipt = await getProvider().getTransactionReceipt(result.transaction_hash);
-  // The mint function returns the token_id, extract from events
+  // Get the token ID from events
+  const receipt = await getProvider().getTransactionReceipt(result.transaction_hash) as any;
   let tokenId = "0";
-  for (const event of receipt.events || []) {
-    // ReceiptMinted event has token_id as first key
+  for (const event of (receipt.events || [])) {
     if (event.keys && event.keys.length >= 2) {
       tokenId = event.keys[1] || "0";
       break;
