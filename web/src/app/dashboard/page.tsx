@@ -237,7 +237,7 @@ function DashboardContent() {
                   <p className="text-xs text-white/70 uppercase tracking-wider">Receive in</p>
                   <button
                     onClick={async () => {
-                      const tokens = [SEPOLIA_TOKENS.STRK, SEPOLIA_TOKENS.USDC, SEPOLIA_TOKENS.ETH];
+                      const tokens: string[] = [SEPOLIA_TOKENS.STRK, SEPOLIA_TOKENS.USDC, SEPOLIA_TOKENS.ETH];
                       const idx = tokens.indexOf(preferredToken);
                       const next = tokens[(idx + 1) % tokens.length];
                       setPreferredToken(next);
