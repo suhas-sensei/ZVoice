@@ -79,7 +79,7 @@ export default function EmployeePage() {
             ZK-verified. Nothing is exposed.
           </p>
           <a
-            href="http://localhost:3010/employee"
+            href="/dashboard"
             className="block w-full bg-black text-white font-medium py-3 px-6 rounded-xl hover:bg-black/90 transition-colors text-sm"
           >
             Sign in with Google

@@ -53,7 +53,7 @@ export default function DashboardPage() {
           <button
             key={i}
             onClick={() => setActiveNav(i)}
-            className={`w-9 h-9 rounded-lg flex items-center justify-center text-base font-bold transition-colors ${
+            className={`w-9 h-9 rounded-lg flex items-center justify-center text-lg font-bold transition-colors ${
               activeNav === i ? "bg-black/5 text-black" : "text-black/60 hover:bg-black/5"
             }`}
           >
@@ -65,70 +65,71 @@ export default function DashboardPage() {
       <div className="flex-1 flex flex-col">
         {/* Top bar */}
         <div className="h-14 flex items-center px-4 gap-3">
-          <span className="text-xl font-black tracking-tight">ZVoice</span>
+          <span className="text-2xl font-black tracking-tight">ZVoice</span>
           <div className="flex-1 max-w-xs ml-4">
-            <div className="bg-[#f5f5f7] rounded-md px-3 py-1.5 text-sm text-black/30 flex items-center gap-1.5">
+            <div className="bg-[#f5f5f7] rounded-md px-3 py-1.5 text-base text-black/30 flex items-center gap-1.5">
               ○ Search
             </div>
           </div>
           <div className="flex-1" />
-          <span className="text-xs font-bold text-black/60">EN</span>
-          <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-xs text-black/70">●</div>
-          <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center text-xs font-bold text-black/70">S</div>
+          <span className="text-sm font-bold text-black/60">EN</span>
+          <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-sm text-black/70">●</div>
+          <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center text-sm font-bold text-black/70">S</div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 flex p-4 gap-4">
-          {/* Left column */}
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-black mb-4">Dashboard</h2>
+        <div className="flex-1 flex p-6 gap-20">
+          {/* Center column */}
+          <div className="flex-1 flex flex-col items-center">
+          <div className="w-full max-w-6xl">
+            <h2 className="text-3xl font-bold text-black mb-5">Dashboard</h2>
 
-            {/* Wallet card + upcoming + balance */}
-            <div className="flex gap-4 mb-6 max-w-3xl">
+            {/* Wallet card + upcoming */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
               {/* Wallet card */}
-              <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-6 text-white flex-1">
+              <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-6 text-white max-w-xs">
                 <div className="flex justify-between items-start mb-8">
-                  <span className="text-lg text-white/30">◉</span>
-                  <span className="text-sm text-white/40">StarkNet</span>
+                  <span className="text-xl text-white/30">◉</span>
+                  <span className="text-base text-white/40">StarkNet</span>
                 </div>
-                <p className="text-lg font-mono tracking-widest mb-6">0x7dcf ···· ···· 0803</p>
+                <p className="text-xl font-mono tracking-widest mb-6">0x7dcf ···· ···· 0803</p>
                 <div className="flex justify-between items-end">
                   <div>
                     <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Employee</p>
-                    <p className="text-base font-semibold">suhas3</p>
+                    <p className="text-lg font-semibold">suhas3</p>
                   </div>
-                  <p className="text-base font-bold text-white/60">Sepolia</p>
+                  <p className="text-lg font-bold text-white/60">Sepolia</p>
                 </div>
               </div>
 
               {/* Upcoming Payments */}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-black/40 mb-3">Upcoming Payments</p>
+              <div>
+                <p className="text-base font-medium text-black/40 mb-3">Upcoming Payments</p>
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-3">
-                    <span className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 text-base flex-shrink-0">⏳</span>
+                    <span className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 text-lg flex-shrink-0">⏳</span>
                     <div className="flex-1">
-                      <p className="text-base font-semibold text-black">Awaiting Approval</p>
+                      <p className="text-lg font-semibold text-black">Awaiting Approval</p>
                       <p className="text-sm text-black/40">3 invoices pending review</p>
                     </div>
-                    <p className="text-base font-bold text-black">$4,238.50</p>
+                    <p className="text-lg font-bold text-black">$4,238.50</p>
                   </div>
                 </div>
               </div>
 
               {/* Wallet balance */}
-              <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-6 text-white flex-1">
-                <p className="text-sm text-white/40 mb-1">Wallet Balance</p>
-                <p className="text-2xl font-black mb-4">$12,840</p>
+              <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-6 text-white max-w-xs">
+                <p className="text-base text-white/40 mb-1">Wallet Balance</p>
+                <p className="text-3xl font-black mb-4">$12,840</p>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-white/50">USDC</span>
-                    <span className="text-sm font-semibold">10,200.00</span>
+                    <span className="text-base text-white/50">USDC</span>
+                    <span className="text-base font-semibold">10,200.00</span>
                   </div>
                   <div className="h-px bg-white/10" />
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-white/50">STRK</span>
-                    <span className="text-sm font-semibold">2,640.00</span>
+                    <span className="text-base text-white/50">STRK</span>
+                    <span className="text-base font-semibold">2,640.00</span>
                   </div>
                 </div>
               </div>
@@ -136,10 +137,10 @@ export default function DashboardPage() {
 
             {/* Recent Transactions */}
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-base font-semibold text-black">Recent Transactions</h3>
+              <h3 className="text-xl font-semibold text-black">Recent Transactions</h3>
               <a
                 href="http://localhost:3010/employee"
-                className="bg-black text-white text-xs font-medium px-3 py-1.5 rounded-md hover:bg-black/90 transition-colors"
+                className="bg-black text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-black/90 transition-colors"
               >
                 Scan Invoices
               </a>
@@ -149,35 +150,36 @@ export default function DashboardPage() {
               {transactions.map((tx, i) => (
                 <div
                   key={i}
-                  className={`flex items-center px-3 py-3 ${i < transactions.length - 1 ? "border-b border-black/5" : ""} hover:bg-black/[0.02] transition-colors`}
+                  className={`flex items-center px-3 py-3.5 ${i < transactions.length - 1 ? "border-b border-black/5" : ""} hover:bg-black/[0.02] transition-colors`}
                 >
-                  <span className="w-8 h-8 bg-[#f5f5f7] rounded-lg flex items-center justify-center text-xs text-black/40 flex-shrink-0">
+                  <span className="w-9 h-9 bg-[#f5f5f7] rounded-lg flex items-center justify-center text-sm text-black/40 flex-shrink-0">
                     {tx.icon}
                   </span>
-                  <p className="ml-3 text-sm font-medium text-black flex-1">{tx.vendor}</p>
-                  <p className="text-xs text-black/25 mx-3 flex-shrink-0">{tx.date}</p>
-                  <p className="text-sm font-bold text-black w-20 text-right flex-shrink-0">{tx.amount}</p>
-                  <span className="ml-3 text-black/15 text-base">⋮</span>
+                  <p className="ml-3 text-base font-medium text-black flex-1">{tx.vendor}</p>
+                  <p className="text-sm text-black/25 mx-3 flex-shrink-0">{tx.date}</p>
+                  <p className="text-base font-bold text-black w-20 text-right flex-shrink-0">{tx.amount}</p>
+                  <span className="ml-3 text-black/15 text-lg">⋮</span>
                 </div>
               ))}
             </div>
+          </div>
           </div>
 
           {/* Right column */}
           <div className="w-[320px] flex-shrink-0">
             <div className="p-4 mb-4">
               <div className="flex justify-between items-start mb-1">
-                <p className="text-sm text-black/40">Reimbursed This Month</p>
-                <span className="text-black/15 text-base">⋮</span>
+                <p className="text-base text-black/40">Reimbursed This Month</p>
+                <span className="text-black/15 text-lg">⋮</span>
               </div>
-              <p className="text-3xl font-black text-black mb-4">$4,238.50</p>
+              <p className="text-4xl font-black text-black mb-4">$4,238.50</p>
 
               <div className="flex gap-1 mb-3">
                 {["Day", "Week", "Month", "Year"].map((t) => (
                   <button
                     key={t}
                     onClick={() => setActiveTime(t)}
-                    className={`text-xs px-2.5 py-1 rounded-md transition-colors ${
+                    className={`text-sm px-2.5 py-1 rounded-md transition-colors ${
                       activeTime === t ? "bg-black text-white" : "text-black/30 hover:text-black/60"
                     }`}
                   >
@@ -190,7 +192,7 @@ export default function DashboardPage() {
 
               <div className="flex justify-between mt-1">
                 {months.map((m, i) => (
-                  <span key={m} className={`text-[10px] ${i === 3 ? "bg-black text-white px-1 py-0.5 rounded-full" : "text-black/20"}`}>
+                  <span key={m} className={`text-xs ${i === 3 ? "bg-black text-white px-1 py-0.5 rounded-full" : "text-black/20"}`}>
                     {m}
                   </span>
                 ))}
@@ -198,17 +200,17 @@ export default function DashboardPage() {
             </div>
 
             <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-xl p-4 text-white">
-              <p className="text-sm text-white/40 mb-0.5">ZK Verification</p>
-              <p className="text-base font-bold mb-3">8 of 8 Verified</p>
+              <p className="text-base text-white/40 mb-0.5">ZK Verification</p>
+              <p className="text-lg font-bold mb-3">8 of 8 Verified</p>
               <div className="flex items-center gap-3">
                 <div className="flex-1">
                   <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <div className="h-full bg-green-400 rounded-full" style={{ width: "100%" }} />
                   </div>
-                  <p className="text-xs text-white/30 mt-1">All invoices DKIM verified</p>
+                  <p className="text-sm text-white/30 mt-1">All invoices DKIM verified</p>
                 </div>
                 <div className="w-14 h-14 rounded-full border-[3px] border-green-400 flex items-center justify-center">
-                  <span className="text-sm font-black">100%</span>
+                  <span className="text-base font-black">100%</span>
                 </div>
               </div>
             </div>

@@ -52,6 +52,15 @@ function EmployeePageContent() {
     Record<string, ProofStatusType>
   >({});
   const [preferredToken, setPreferredToken] = useState<string>(SEPOLIA_TOKENS.USDC);
+  const [proofData, setProofData] = useState<Record<string, {
+    invoiceHash: string;
+    txHash: string;
+    vendor: string;
+    amountCents: number;
+    timestamp: number;
+    proofVerified: boolean;
+  }>>({});
+  const [viewingProof, setViewingProof] = useState<string | null>(null);
 
   useEffect(() => {
     if (searchParams.get("gmail") === "connected") {
@@ -106,9 +115,14 @@ function EmployeePageContent() {
       });
 
       if (res.ok) {
+        const data = await res.json();
         setProofStates((prev) => ({
           ...prev,
           [email.messageId]: "verified",
+        }));
+        setProofData((prev) => ({
+          ...prev,
+          [email.messageId]: data,
         }));
         loadInvoices();
       } else {
@@ -254,18 +268,28 @@ function EmployeePageContent() {
                             />
                           </td>
                           <td className="px-4 py-3">
-                            <button
-                              onClick={() => handleGenerateProof(email)}
-                              disabled={
-                                proofStates[email.messageId] === "generating" ||
-                                proofStates[email.messageId] === "verified"
-                              }
-                              className="text-xs bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:text-gray-500 text-white px-3 py-1 rounded transition-colors"
-                            >
-                              {proofStates[email.messageId] === "verified"
-                                ? "Submitted"
-                                : "Generate Proof"}
-                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleGenerateProof(email)}
+                                disabled={
+                                  proofStates[email.messageId] === "generating" ||
+                                  proofStates[email.messageId] === "verified"
+                                }
+                                className="text-xs bg-purple-600 hover:bg-purple-700 disabled:bg-gray-700 disabled:text-gray-500 text-white px-3 py-1 rounded transition-colors"
+                              >
+                                {proofStates[email.messageId] === "verified"
+                                  ? "Submitted"
+                                  : "Generate Proof"}
+                              </button>
+                              {proofData[email.messageId] && (
+                                <button
+                                  onClick={() => setViewingProof(email.messageId)}
+                                  className="text-xs bg-cyan-600 hover:bg-cyan-700 text-white px-3 py-1 rounded transition-colors"
+                                >
+                                  View Proof
+                                </button>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -350,6 +374,91 @@ function EmployeePageContent() {
           </div>
         )}
       </main>
+
+      {/* Proof Details Modal */}
+      {viewingProof && proofData[viewingProof] && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center" onClick={() => setViewingProof(null)}>
+          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 max-w-lg w-full mx-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold text-white">Proof Details</h3>
+              <button onClick={() => setViewingProof(null)} className="text-gray-500 hover:text-white text-xl">&times;</button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Status</p>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-green-400" />
+                  <span className="text-sm text-green-400 font-medium">
+                    {proofData[viewingProof].proofVerified ? "DKIM Verified" : "Not Verified"}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Invoice Hash (Commitment)</p>
+                <p className="text-sm text-white font-mono bg-gray-800 rounded px-3 py-2 break-all">
+                  {proofData[viewingProof].invoiceHash}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">On-Chain Transaction</p>
+                <a
+                  href={`https://sepolia.starkscan.co/tx/${proofData[viewingProof].txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-blue-400 hover:underline font-mono bg-gray-800 rounded px-3 py-2 break-all block"
+                >
+                  {proofData[viewingProof].txHash}
+                </a>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Vendor</p>
+                  <p className="text-sm text-white">{proofData[viewingProof].vendor}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Amount</p>
+                  <p className="text-sm text-white font-medium">
+                    ${(proofData[viewingProof].amountCents / 100).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Timestamp</p>
+                <p className="text-sm text-white">
+                  {new Date(proofData[viewingProof].timestamp * 1000).toLocaleString()}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Verification Method</p>
+                <p className="text-sm text-white">DKIM Signature — cryptographically proves the email was sent by the vendor&apos;s mail server without exposing email content</p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex gap-3">
+              <a
+                href={`https://sepolia.starkscan.co/tx/${proofData[viewingProof].txHash}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 rounded-lg text-center transition-colors"
+              >
+                View on Starkscan
+              </a>
+              <button
+                onClick={() => setViewingProof(null)}
+                className="flex-1 bg-gray-800 hover:bg-gray-700 text-white text-sm font-medium py-2 rounded-lg transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
