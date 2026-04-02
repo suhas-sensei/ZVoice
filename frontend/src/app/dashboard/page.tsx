@@ -72,9 +72,9 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="flex-1" />
-          <span className="text-xs text-black/30">EN</span>
-          <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-xs text-black/40">●</div>
-          <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center text-xs font-bold text-black/50">S</div>
+          <span className="text-xs font-bold text-black/60">EN</span>
+          <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center text-xs text-black/70">●</div>
+          <div className="w-8 h-8 rounded-full bg-black/10 flex items-center justify-center text-xs font-bold text-black/70">S</div>
         </div>
 
         {/* Content */}
