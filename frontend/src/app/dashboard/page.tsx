@@ -53,8 +53,8 @@ export default function DashboardPage() {
           <button
             key={i}
             onClick={() => setActiveNav(i)}
-            className={`w-9 h-9 rounded-lg flex items-center justify-center text-base transition-colors ${
-              activeNav === i ? "bg-black/5 text-black" : "text-black/30 hover:bg-black/5"
+            className={`w-9 h-9 rounded-lg flex items-center justify-center text-base font-bold transition-colors ${
+              activeNav === i ? "bg-black/5 text-black" : "text-black/60 hover:bg-black/5"
             }`}
           >
             {icon}
