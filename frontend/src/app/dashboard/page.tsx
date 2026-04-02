@@ -83,37 +83,52 @@ export default function DashboardPage() {
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-black mb-4">Dashboard</h2>
 
-            {/* Wallet card + upcoming */}
-            <div className="flex gap-3 mb-6">
-              <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-xl p-4 text-white w-[260px] flex-shrink-0">
-                <div className="flex justify-between items-start mb-6">
-                  <span className="text-sm text-white/30">◉</span>
-                  <span className="text-xs text-white/30">StarkNet</span>
+            {/* Wallet card + upcoming + balance */}
+            <div className="flex gap-4 mb-6">
+              {/* Wallet card */}
+              <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-6 text-white w-[300px] flex-shrink-0">
+                <div className="flex justify-between items-start mb-8">
+                  <span className="text-lg text-white/30">◉</span>
+                  <span className="text-sm text-white/40">StarkNet</span>
                 </div>
-                <p className="text-base font-mono tracking-widest mb-4">0x7dcf ···· ···· 0803</p>
+                <p className="text-lg font-mono tracking-widest mb-6">0x7dcf ···· ···· 0803</p>
                 <div className="flex justify-between items-end">
                   <div>
-                    <p className="text-[11px] text-white/30 uppercase">Employee</p>
-                    <p className="text-sm font-medium">suhas3</p>
+                    <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Employee</p>
+                    <p className="text-base font-semibold">suhas3</p>
                   </div>
-                  <p className="text-sm font-bold text-white/60">Sepolia</p>
+                  <p className="text-base font-bold text-white/60">Sepolia</p>
                 </div>
               </div>
 
+              {/* Upcoming Payments */}
               <div className="flex-1">
-                <p className="text-sm font-medium text-black/40 mb-2">Upcoming Payments</p>
-                <div className="flex gap-2">
-                  <div className="p-3 flex-1">
-                    <span className="text-base text-black/30 block mb-1">◈</span>
-                    <p className="text-sm font-semibold text-black">Batch Pay</p>
-                    <p className="text-xs text-black/30">3 pending</p>
-                    <p className="text-sm font-bold text-black mt-1">$4,238.50</p>
+                <p className="text-sm font-medium text-black/40 mb-3">Upcoming Payments</p>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <span className="w-9 h-9 bg-amber-100 rounded-xl flex items-center justify-center text-amber-600 text-base flex-shrink-0">⏳</span>
+                    <div className="flex-1">
+                      <p className="text-base font-semibold text-black">Awaiting Approval</p>
+                      <p className="text-sm text-black/40">3 invoices pending review</p>
+                    </div>
+                    <p className="text-base font-bold text-black">$4,238.50</p>
                   </div>
-                  <div className="p-3 flex-1">
-                    <span className="text-base text-black/30 block mb-1">⇄</span>
-                    <p className="text-sm font-semibold text-black">StarkZap</p>
-                    <p className="text-xs text-black/30">Auto-swap</p>
-                    <p className="text-sm font-bold text-black mt-1">USDC → STRK</p>
+                </div>
+              </div>
+
+              {/* Wallet balance */}
+              <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-6 text-white w-[220px] flex-shrink-0">
+                <p className="text-sm text-white/40 mb-1">Wallet Balance</p>
+                <p className="text-2xl font-black mb-4">$12,840</p>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-white/50">USDC</span>
+                    <span className="text-sm font-semibold">10,200.00</span>
+                  </div>
+                  <div className="h-px bg-white/10" />
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-white/50">STRK</span>
+                    <span className="text-sm font-semibold">2,640.00</span>
                   </div>
                 </div>
               </div>
