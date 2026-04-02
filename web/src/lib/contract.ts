@@ -638,3 +638,46 @@ export async function getTotalDisbursed(): Promise<bigint> {
   const contract = getTreasuryContract();
   return (await contract.call("get_total_disbursed")) as bigint;
 }
+
+// ── Reimbursement NFT ────────────────────────────────────────────────
+
+export async function mintReceiptNFT(params: {
+  employee: string;
+  invoiceId: number;
+  vendor: string;
+  amountCents: number;
+  paymentTx: string;
+  timestamp: number;
+}): Promise<{ txHash: string; tokenId: string }> {
+  const account = getAdminAccount();
+  const contractAddress = process.env.NFT_ADDRESS!;
+
+  const result = await account.execute({
+    contractAddress,
+    entrypoint: "mint_receipt",
+    calldata: CallData.compile({
+      employee: params.employee,
+      invoice_id: params.invoiceId,
+      vendor: params.vendor,
+      amount_cents: params.amountCents,
+      payment_tx: params.paymentTx,
+      timestamp: params.timestamp,
+    }),
+  });
+
+  await account.waitForTransaction(result.transaction_hash);
+
+  // Get the token ID from the receipt (it's the return value)
+  const receipt = await getProvider().getTransactionReceipt(result.transaction_hash);
+  // The mint function returns the token_id, extract from events
+  let tokenId = "0";
+  for (const event of receipt.events || []) {
+    // ReceiptMinted event has token_id as first key
+    if (event.keys && event.keys.length >= 2) {
+      tokenId = event.keys[1] || "0";
+      break;
+    }
+  }
+
+  return { txHash: result.transaction_hash, tokenId };
+}

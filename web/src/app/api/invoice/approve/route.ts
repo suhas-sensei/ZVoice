@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { approveInvoiceOnChain, markPaidOnChain, getInvoices, getPreferredToken } from "@/lib/contract";
+import { approveInvoiceOnChain, markPaidOnChain, getInvoices, getPreferredToken, mintReceiptNFT } from "@/lib/contract";
 import { payEmployee } from "@/lib/starkzap";
+import { shortStringToFelt } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
   const { invoiceId, employeeAddress, amountCents, preferredToken, adminAddress } =
@@ -47,10 +48,35 @@ export async function POST(request: NextRequest) {
     // Mark paid on-chain
     await markPaidOnChain(invoiceId, paymentTx);
 
+    // Mint receipt NFT to employee's wallet
+    let nftTx = "";
+    let nftTokenId = "";
+    try {
+      const emp = employeeAddress || invoice?.employee || "";
+      const vendor = invoice?.vendor || "";
+      const amount = amountCents || invoice?.amountCents || 0;
+      const vendorFelt = shortStringToFelt(vendor.slice(0, 31));
+
+      const nft = await mintReceiptNFT({
+        employee: emp,
+        invoiceId,
+        vendor: vendorFelt,
+        amountCents: amount,
+        paymentTx,
+        timestamp: Math.floor(Date.now() / 1000),
+      });
+      nftTx = nft.txHash;
+      nftTokenId = nft.tokenId;
+    } catch (nftErr) {
+      console.error("NFT mint failed (non-blocking):", nftErr);
+    }
+
     return NextResponse.json({
       success: true,
       approveTx,
       paymentTx,
+      nftTx,
+      nftTokenId,
     });
   } catch (error) {
     console.error("Approve/pay error:", error);
