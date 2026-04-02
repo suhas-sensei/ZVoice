@@ -84,7 +84,7 @@ export default function DashboardPage() {
             <h2 className="text-2xl font-bold text-black mb-4">Dashboard</h2>
 
             {/* Wallet card + upcoming + balance */}
-            <div className="flex gap-4 mb-6">
+            <div className="flex gap-4 mb-6 max-w-3xl">
               {/* Wallet card */}
               <div className="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-2xl p-6 text-white flex-1">
                 <div className="flex justify-between items-start mb-8">
