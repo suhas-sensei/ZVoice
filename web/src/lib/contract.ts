@@ -662,19 +662,22 @@ export async function getEmployeeReceipts(employee: string): Promise<Array<{
 
   const receipts = [];
   for (let i = 0; i < count; i++) {
-    // Get token ID at index
+    // Get token ID at index (u64)
     const tokenIdResult = await provider.callContract({
       contractAddress: nftAddress,
       entrypoint: "get_employee_receipt_at",
-      calldata: [employee, i.toString(), "0"], // u256 low, high
+      calldata: [employee, i.toString()],
     });
-    const tokenId = Number(BigInt(tokenIdResult[0]));
+    // token_id is u256 (low, high)
+    const tokenIdLow = tokenIdResult[0];
+    const tokenIdHigh = tokenIdResult[1] || "0x0";
+    const tokenId = Number(BigInt(tokenIdLow));
 
-    // Get receipt data
+    // Get receipt data (takes u256 token_id)
     const receiptResult = await provider.callContract({
       contractAddress: nftAddress,
       entrypoint: "get_receipt",
-      calldata: [tokenId.toString(), "0"], // u256 low, high
+      calldata: [tokenIdLow, tokenIdHigh],
     });
 
     // Returns: (owner, invoice_id, vendor, amount_cents, payment_tx, timestamp)
